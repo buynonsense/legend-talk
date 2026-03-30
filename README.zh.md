@@ -65,10 +65,12 @@ npm run dev
 
 ## CORS 代理
 
-大多数 LLM API 不允许浏览器直接调用。部署一个简单的 Cloudflare Worker 作为 CORS 代理：
+部分 API 不允许浏览器直接调用。在设置页按服务商开关 CORS 代理，默认使用公共节点（`https://cors.api2026.workers.dev`）。
 
-1. 登录 [Cloudflare Workers](https://dash.cloudflare.com) → 创建 Worker
-2. 粘贴以下代码并部署：
+如需自建代理，创建 [Cloudflare Worker](https://dash.cloudflare.com) 并部署以下代码：
+
+<details>
+<summary>Worker 代码</summary>
 
 ```javascript
 export default {
@@ -100,7 +102,7 @@ export default {
 };
 ```
 
-3. 在设置页面 → CORS 代理中填入 Worker URL
+</details>
 
 ## 项目结构
 

@@ -65,10 +65,12 @@ Open http://localhost:5173, go to Settings, enter your API key, then start chatt
 
 ## CORS Proxy
 
-Most LLM APIs block direct browser requests. Deploy a simple Cloudflare Worker as a CORS proxy:
+Some API providers block direct browser requests. CORS proxy is configured per provider in Settings — toggle the switch to enable it. A public proxy (`https://cors.api2026.workers.dev`) is used by default.
 
-1. Go to [Cloudflare Workers](https://dash.cloudflare.com) → Create Worker
-2. Paste this code and deploy:
+To deploy your own, create a [Cloudflare Worker](https://dash.cloudflare.com) with this code:
+
+<details>
+<summary>Worker code</summary>
 
 ```javascript
 export default {
@@ -100,7 +102,7 @@ export default {
 };
 ```
 
-3. Enter the Worker URL in Settings → CORS Proxy
+</details>
 
 ## Project Structure
 
