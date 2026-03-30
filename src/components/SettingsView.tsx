@@ -34,79 +34,61 @@ export function SettingsView() {
         <h2 className="text-2xl font-bold">{t('settings.title')}</h2>
       </div>
 
-      {/* API Keys */}
-      <section>
-        <h3 className="text-lg font-semibold mb-3">{t('settings.apiKeys')}</h3>
-        <div className="space-y-3">
-          {adapters.map((adapter) => (
-            <div key={adapter.id}>
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {adapter.name}
-                </label>
-                {adapter.apiKeyUrl && (
-                  <a href={adapter.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
-                    Get Key
-                  </a>
-                )}
-                {adapter.docsUrl && (
-                  <a href={adapter.docsUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    Docs
-                  </a>
-                )}
-              </div>
-              <input
-                type="password"
-                value={settings.apiKeys[adapter.id] || ''}
-                onChange={(e) => settings.setApiKey(adapter.id, e.target.value)}
-                placeholder={t('settings.apiKeyPlaceholder', { provider: adapter.name })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          ))}
-          <button
-            onClick={() => settings.clearApiKeys()}
-            className="text-sm text-red-500 hover:underline"
+      {/* Provider + Model + Key — one cohesive section */}
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{t('settings.defaultProvider')}</h3>
+          <select
+            value={settings.defaultProvider}
+            onChange={(e) => {
+              const prev = settings.defaultProvider;
+              const next = e.target.value;
+              const modelMap = JSON.parse(localStorage.getItem('legend-talk-provider-models') || '{}');
+              modelMap[prev] = settings.defaultModel;
+              localStorage.setItem('legend-talk-provider-models', JSON.stringify(modelMap));
+              settings.setDefaultProvider(next);
+              const saved = modelMap[next];
+              if (saved) {
+                settings.setDefaultModel(saved);
+              } else {
+                const newAdapter = getAdapter(next);
+                settings.setDefaultModel(newAdapter?.models[0]?.id || '');
+              }
+            }}
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
           >
-            {t('settings.clearKeys')}
-          </button>
+            {adapters.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
         </div>
-      </section>
 
-      {/* Default Provider & Model */}
-      <section>
-        <h3 className="text-lg font-semibold mb-3">{t('settings.defaultProvider')}</h3>
-        <select
-          value={settings.defaultProvider}
-          onChange={(e) => {
-            const prev = settings.defaultProvider;
-            const next = e.target.value;
-            // Save current model for this provider before switching
-            const modelMap = JSON.parse(localStorage.getItem('legend-talk-provider-models') || '{}');
-            modelMap[prev] = settings.defaultModel;
-            localStorage.setItem('legend-talk-provider-models', JSON.stringify(modelMap));
+        {/* API Key — only for selected provider */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t('settings.apiKeys')}
+            </label>
+            {currentAdapter?.apiKeyUrl && (
+              <a href={currentAdapter.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
+                Get Key ↗
+              </a>
+            )}
+          </div>
+          <input
+            type="password"
+            value={settings.apiKeys[settings.defaultProvider] || ''}
+            onChange={(e) => settings.setApiKey(settings.defaultProvider, e.target.value)}
+            placeholder={t('settings.apiKeyPlaceholder', { provider: currentAdapter?.name || '' })}
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-            settings.setDefaultProvider(next);
-            // Restore saved model for new provider, or fall back to first preset
-            const saved = modelMap[next];
-            if (saved) {
-              settings.setDefaultModel(saved);
-            } else {
-              const newAdapter = getAdapter(next);
-              settings.setDefaultModel(newAdapter?.models[0]?.id || '');
-            }
-          }}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-        >
-          {adapters.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
-          ))}
-        </select>
-
+        {/* Custom base URL */}
         {settings.defaultProvider === 'custom' && (
-          <>
-            <h3 className="text-lg font-semibold mt-4 mb-1">{t('settings.customBaseUrl')}</h3>
-            <p className="text-sm text-gray-500 mb-2">{t('settings.customBaseUrlHint')}</p>
+          <div>
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('settings.customBaseUrl')}</label>
+            <p className="text-xs text-gray-400 mb-1">{t('settings.customBaseUrlHint')}</p>
             <input
               type="text"
               value={settings.customBaseUrl}
@@ -114,39 +96,47 @@ export function SettingsView() {
               placeholder="https://api.example.com/v1"
               className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </>
+          </div>
         )}
 
-        <h3 className="text-lg font-semibold mt-4 mb-3">{t('settings.defaultModel')}</h3>
-        <div className="flex gap-2">
+        {/* Model */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('settings.defaultModel')}</h3>
+            {currentAdapter?.docsUrl && (
+              <a href={currentAdapter.docsUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                Docs ↗
+              </a>
+            )}
+          </div>
           <select
             value={(currentAdapter?.models || []).some((m) => m.id === settings.defaultModel) ? settings.defaultModel : '__custom__'}
             onChange={(e) => {
               settings.setDefaultModel(e.target.value === '__custom__' ? '' : e.target.value);
             }}
-            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
           >
             {(currentAdapter?.models || []).map((m) => (
               <option key={m.id} value={m.id}>{m.name}</option>
             ))}
             <option value="__custom__">{t('settings.customModel')}</option>
           </select>
+          {!(currentAdapter?.models || []).some((m) => m.id === settings.defaultModel) && (
+            <input
+              type="text"
+              value={settings.defaultModel}
+              onChange={(e) => settings.setDefaultModel(e.target.value)}
+              placeholder="model-id"
+              className="w-full mt-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          )}
         </div>
-        {!(currentAdapter?.models || []).some((m) => m.id === settings.defaultModel) && (
-          <input
-            type="text"
-            value={settings.defaultModel}
-            onChange={(e) => settings.setDefaultModel(e.target.value)}
-            placeholder="model-id"
-            className="w-full mt-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        )}
       </section>
 
       {/* Thinking Level */}
       <section>
         <h3 className="text-lg font-semibold mb-1">{t('settings.thinkingLevel')}</h3>
-        <p className="text-sm text-gray-500 mb-2">{t('settings.thinkingLevelHint')}</p>
+        <p className="text-xs text-gray-400 mb-2">{t('settings.thinkingLevelHint')}</p>
         <select
           value={settings.thinkingLevel}
           onChange={(e) => settings.setThinkingLevel(e.target.value as 'off' | 'low' | 'medium' | 'high')}
@@ -162,7 +152,7 @@ export function SettingsView() {
       {/* CORS Proxy */}
       <section>
         <h3 className="text-lg font-semibold mb-1">{t('settings.corsProxy')}</h3>
-        <p className="text-sm text-gray-500 mb-2">{t('settings.corsProxyHint')}</p>
+        <p className="text-xs text-gray-400 mb-2">{t('settings.corsProxyHint')}</p>
         <input
           type="text"
           value={settings.corsProxy}
@@ -175,7 +165,7 @@ export function SettingsView() {
       {/* Language & Theme */}
       <section className="flex gap-8">
         <div>
-          <h3 className="text-lg font-semibold mb-3">{t('settings.language')}</h3>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{t('settings.language')}</h3>
           <select
             value={i18n.language.startsWith('zh') ? 'zh' : 'en'}
             onChange={(e) => {
@@ -189,7 +179,7 @@ export function SettingsView() {
           </select>
         </div>
         <div>
-          <h3 className="text-lg font-semibold mb-3">{t('settings.theme')}</h3>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{t('settings.theme')}</h3>
           <select
             value={settings.theme}
             onChange={(e) => settings.setTheme(e.target.value as 'light' | 'dark')}
@@ -203,7 +193,7 @@ export function SettingsView() {
 
       {/* Data Management */}
       <section>
-        <h3 className="text-lg font-semibold mb-3">{t('settings.storageUsed', { size: getStorageUsage() })}</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{t('settings.storageUsed', { size: getStorageUsage() })}</h3>
         <div className="flex gap-3">
           <button
             onClick={handleExportAll}
