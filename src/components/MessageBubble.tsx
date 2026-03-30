@@ -10,6 +10,12 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ content, isUser, avatar, color, name }: MessageBubbleProps) {
+  const trimmed = content?.trim() || '...';
+  // Single char: render raw to avoid Markdown eating symbols like *
+  // Multi char: escape [text]: to prevent invisible link reference definitions
+  const isRaw = trimmed.length === 1;
+  const displayText = isRaw ? trimmed : trimmed.replace(/^\[([^\]]+)\]:/gm, '\\[$1]:');
+
   return (
     <div className={`flex gap-2 sm:gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {isUser ? (
@@ -32,7 +38,7 @@ export function MessageBubble({ content, isUser, avatar, color, name }: MessageB
           <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">{name}</div>
         )}
         <div className="prose dark:prose-invert prose-sm max-w-none">
-          <ReactMarkdown>{content || '...'}</ReactMarkdown>
+          {isRaw ? <span>{displayText}</span> : <ReactMarkdown>{displayText}</ReactMarkdown>}
         </div>
       </div>
     </div>
