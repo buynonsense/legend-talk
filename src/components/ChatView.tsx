@@ -141,8 +141,15 @@ export function ChatView({ conversationId }: ChatViewProps) {
         { role: 'system', content: summaryPrompt },
         { role: 'user', content: transcript },
       ], provider);
-    } catch {
-      // streamResponse already created the message; error surfaces via the chat hook's error state
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
+      // Find the empty message streamResponse created and write the error into it
+      const conv = useConversationStore.getState().getConversation(conversationId);
+      const lastMsg = conv?.messages[conv.messages.length - 1];
+      if (lastMsg) {
+        const prefix = lastMsg.content ? lastMsg.content + '\n\n' : '';
+        useConversationStore.getState().updateMessageContent(conversationId, lastMsg.id, `${prefix}Error: ${errMsg}`);
+      }
     } finally {
       setIsSummarizing(false);
     }
@@ -191,7 +198,9 @@ export function ChatView({ conversationId }: ChatViewProps) {
       compressed.set(chunk, offset);
       offset += chunk.length;
     }
-    const base64 = btoa(String.fromCharCode(...compressed)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    let binary = '';
+    for (let i = 0; i < compressed.length; i++) binary += String.fromCharCode(compressed[i]);
+    const base64 = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     const url = `${window.location.origin}${window.location.pathname}#/shared/${base64}`;
     if (url.length > 32000) {
       setShareStatus('tooLong');
@@ -426,16 +435,28 @@ export function ChatView({ conversationId }: ChatViewProps) {
           );
         })}
         {isGenerating && isMulti && speakerChar && roundtable.currentRound && (
-          <div className="text-sm text-gray-400">
-            {t('roundtable.roundProgress', {
+          <div className="flex items-center gap-1.5 text-sm text-gray-400">
+            <span>{t('roundtable.roundProgress', {
               current: roundtable.currentRound,
               total: roundtable.totalRounds,
               name: speakerChar.name[lang] || speakerChar.name.en,
-            })}
+            })}</span>
+            <span className="flex gap-0.5">
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
           </div>
         )}
         {isGenerating && !isMulti && (
-          <div className="text-sm text-gray-400">{t('chat.thinking')}</div>
+          <div className="flex items-center gap-1.5 text-sm text-gray-400">
+            <span>{t('chat.thinking')}</span>
+            <span className="flex gap-0.5">
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
+          </div>
         )}
         {error && (() => {
           const isCors = !useSettingsStore.getState().corsProxy && /Failed to fetch|NetworkError|Load failed/.test(error);
@@ -445,7 +466,8 @@ export function ChatView({ conversationId }: ChatViewProps) {
               <button
                 onClick={() => {
                   useSettingsStore.getState().setCorsProxy('https://cors.api2026.workers.dev');
-                  handleRetryFrom(conversation.messages[conversation.messages.length - 1]?.id);
+                  const lastUserMsg = [...conversation.messages].reverse().find((m) => m.role === 'user');
+                  if (lastUserMsg) handleRetryFrom(lastUserMsg.id);
                 }}
                 className="text-xs px-2.5 py-1 rounded bg-amber-500 text-white hover:bg-amber-600"
               >
