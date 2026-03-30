@@ -65,6 +65,61 @@ const adapters: LLMAdapter[] = [
   ),
 
   new OpenAICompatibleAdapter(
+    'siliconflow',
+    'SiliconFlow',
+    'https://api.siliconflow.cn/v1',
+    [
+      { id: 'deepseek-ai/DeepSeek-V3.2', name: 'DeepSeek V3.2' },
+      { id: 'deepseek-ai/DeepSeek-R1', name: 'DeepSeek R1' },
+      { id: 'Qwen/Qwen3.5-397B-A17B', name: 'Qwen3.5 397B' },
+      { id: 'Qwen/Qwen3-32B', name: 'Qwen3 32B' },
+      { id: 'Pro/moonshotai/Kimi-K2.5', name: 'Kimi K2.5 Pro' },
+      { id: 'Pro/zai-org/GLM-5', name: 'GLM-5 Pro' },
+    ],
+    {
+      docsUrl: 'https://docs.siliconflow.cn/api-reference/chat-completions/chat-completions',
+      apiKeyUrl: 'https://cloud.siliconflow.cn/me/account/ak',
+    },
+  ),
+
+  new OpenAICompatibleAdapter(
+    'groq',
+    'Groq',
+    'https://api.groq.com/openai/v1',
+    [
+      { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+      { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B' },
+      { id: 'openai/gpt-oss-20b', name: 'GPT OSS 20B' },
+      { id: 'qwen/qwen3-32b', name: 'Qwen3 32B' },
+      { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
+    ],
+    {
+      docsUrl: 'https://console.groq.com/docs/text-chat',
+      apiKeyUrl: 'https://console.groq.com/keys',
+    },
+  ),
+
+  new OpenAICompatibleAdapter(
+    'openrouter',
+    'OpenRouter',
+    'https://openrouter.ai/api/v1',
+    [
+      { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'NVIDIA: Nemotron 3 Super (free)' },
+      { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+      { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash' },
+      { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2' },
+      { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast' },
+      { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B' },
+      { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4' },
+      { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B' },
+    ],
+    {
+      docsUrl: 'https://openrouter.ai/models',
+      apiKeyUrl: 'https://openrouter.ai/settings/keys',
+    },
+  ),
+
+  new OpenAICompatibleAdapter(
     'custom',
     'Custom (OpenAI Compatible)',
     '',

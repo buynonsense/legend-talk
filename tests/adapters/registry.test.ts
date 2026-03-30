@@ -9,8 +9,11 @@ describe('adapter registry', () => {
     expect(ids).toContain('deepseek');
     expect(ids).toContain('volcengine');
     expect(ids).toContain('alibaba');
+    expect(ids).toContain('siliconflow');
+    expect(ids).toContain('groq');
+    expect(ids).toContain('openrouter');
     expect(ids).toContain('custom');
-    expect(adapters.length).toBe(6);
+    expect(adapters.length).toBe(9);
   });
 
   it('gets adapter by id', () => {
