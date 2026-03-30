@@ -61,6 +61,7 @@
     "rounds": "Discussion rounds",
     "roundProgress": "Round {{current}}/{{total}} — {{name}} is speaking...",
     "discussionComplete": "Discussion complete. Ask a follow-up to continue.",
+    "continue": "Continue {{count}} rounds",
     "removeParticipant": "Remove",
     "minParticipants": "At least 2 participants required"
   },

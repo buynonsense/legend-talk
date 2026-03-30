@@ -61,6 +61,7 @@
     "rounds": "讨论轮数",
     "roundProgress": "第 {{current}}/{{total}} 轮 — {{name}} 正在发言...",
     "discussionComplete": "讨论完毕。输入追问可继续讨论。",
+    "continue": "继续 {{count}} 轮",
     "removeParticipant": "移除",
     "minParticipants": "至少需要 2 位参与者"
   },

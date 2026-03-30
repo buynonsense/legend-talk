@@ -103,7 +103,36 @@ export function useRoundtable() {
     }
   }
 
-  return { sendMessage, continueFrom, isGenerating, currentSpeaker, currentRound, totalRounds, error };
+  async function addRounds(conversationId: string, count: number) {
+    const provider = resolveProvider();
+    if (!provider) { setError(i18n.t('chat.noApiKey')); return; }
+
+    setIsGenerating(true);
+    setError(null);
+    setTotalRounds(count);
+
+    try {
+      for (let round = 1; round <= count; round++) {
+        setCurrentRound(round);
+        const conv = useConversationStore.getState().getConversation(conversationId)!;
+        for (const charId of conv.characters) {
+          setCurrentSpeaker(charId);
+          const character = presetCharacters.find((c) => c.id === charId);
+          if (!character) continue;
+          const messages = buildRoundtableMessages(character, conversationId, provider.lang);
+          await streamResponse(conversationId, charId, messages, provider);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : i18n.t('common.error', { message: '' }));
+    } finally {
+      setIsGenerating(false);
+      setCurrentSpeaker(null);
+      setCurrentRound(null);
+    }
+  }
+
+  return { sendMessage, continueFrom, addRounds, isGenerating, currentSpeaker, currentRound, totalRounds, error };
 }
 
 function buildRoundtableMessages(

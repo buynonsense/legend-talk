@@ -140,15 +140,9 @@ export function ChatView({ conversationId }: ChatViewProps) {
         { role: 'system', content: summaryPrompt },
         { role: 'user', content: transcript },
       ], provider);
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : 'Unknown error';
-      // Find the empty message streamResponse created and write the error into it
-      const conv = useConversationStore.getState().getConversation(conversationId);
-      const lastMsg = conv?.messages[conv.messages.length - 1];
-      if (lastMsg) {
-        const prefix = lastMsg.content ? lastMsg.content + '\n\n' : '';
-        useConversationStore.getState().updateMessageContent(conversationId, lastMsg.id, `${prefix}Error: ${errMsg}`);
-      }
+    } catch {
+      // streamResponse only creates a message when tokens arrive;
+      // if it failed before that, no cleanup needed
     } finally {
       setIsSummarizing(false);
     }
@@ -249,9 +243,9 @@ export function ChatView({ conversationId }: ChatViewProps) {
             <input
               type="number"
               min={1}
-              max={10}
+              max={100}
               value={rounds}
-              onChange={(e) => setRounds(Math.max(1, Math.min(10, Number(e.target.value))))}
+              onChange={(e) => setRounds(Math.max(1, Math.min(100, Number(e.target.value))))}
               disabled={isGenerating}
               className="w-14 px-1 py-0.5 text-sm rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-center"
             />
@@ -497,6 +491,14 @@ export function ChatView({ conversationId }: ChatViewProps) {
       <div className="flex items-center gap-2 px-2 sm:px-4 pt-1">
         {hasMessages && !isGenerating && !isSummarizing && (
           <>
+            {isMulti && (
+              <button
+                onClick={() => roundtable.addRounds(conversationId, rounds)}
+                className="text-xs px-3 py-1 rounded-full border border-blue-400 dark:border-blue-500 text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              >
+                {t('roundtable.continue', { count: rounds })}
+              </button>
+            )}
             <button
               onClick={handleSummarize}
               className="text-xs px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
