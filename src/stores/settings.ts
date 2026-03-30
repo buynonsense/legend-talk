@@ -1,0 +1,57 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface SettingsState {
+  apiKeys: Record<string, string>;
+  defaultProvider: string;
+  defaultModel: string;
+  language: string;
+  theme: 'light' | 'dark';
+  corsProxy: string;
+  customBaseUrl: string;
+  thinkingLevel: 'off' | 'low' | 'medium' | 'high';
+  favoriteCharacters: string[];
+  setApiKey: (provider: string, key: string) => void;
+  setDefaultProvider: (provider: string) => void;
+  setDefaultModel: (model: string) => void;
+  setLanguage: (language: string) => void;
+  setTheme: (theme: 'light' | 'dark') => void;
+  setCorsProxy: (proxy: string) => void;
+  setCustomBaseUrl: (url: string) => void;
+  setThinkingLevel: (level: 'off' | 'low' | 'medium' | 'high') => void;
+  toggleFavorite: (characterId: string) => void;
+  clearApiKeys: () => void;
+}
+
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
+      apiKeys: {},
+      defaultProvider: 'deepseek',
+      defaultModel: 'deepseek-chat',
+      language: navigator.language.startsWith('zh') ? 'zh' : 'en',
+      theme: 'light',
+      corsProxy: '',
+      customBaseUrl: '',
+      thinkingLevel: 'off' as const,
+      favoriteCharacters: [],
+      setApiKey: (provider, key) =>
+        set((s) => ({ apiKeys: { ...s.apiKeys, [provider]: key } })),
+      setDefaultProvider: (defaultProvider) => set({ defaultProvider }),
+      setDefaultModel: (defaultModel) => set({ defaultModel }),
+      setLanguage: (language) => set({ language }),
+      setTheme: (theme) => set({ theme }),
+      setCorsProxy: (corsProxy) => set({ corsProxy }),
+      setCustomBaseUrl: (customBaseUrl) => set({ customBaseUrl }),
+      setThinkingLevel: (thinkingLevel) => set({ thinkingLevel }),
+      toggleFavorite: (characterId) =>
+        set((s) => ({
+          favoriteCharacters: s.favoriteCharacters.includes(characterId)
+            ? s.favoriteCharacters.filter((id) => id !== characterId)
+            : [...s.favoriteCharacters, characterId],
+        })),
+      clearApiKeys: () => set({ apiKeys: {} }),
+    }),
+    { name: 'legend-talk-settings' },
+  ),
+);

@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-chat-user: #3b82f6;
+  --color-chat-bg: #f9fafb;
+  --color-chat-bg-dark: #111827;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
