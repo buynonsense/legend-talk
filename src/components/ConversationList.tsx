@@ -32,6 +32,10 @@ export function ConversationList({ activeId }: ConversationListProps) {
   const [collapsed, setCollapsed] = useState(isMobile);
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    setCollapsed(isMobile);
+  }, [isMobile]);
+
   const getDisplayTitle = (conv: typeof conversations[0]) => {
     if (conv.title) return conv.title;
     return conv.characters
@@ -96,11 +100,11 @@ export function ConversationList({ activeId }: ConversationListProps) {
     );
   }
 
-  return (
-    <div className="w-64 border-r border-gray-200 dark:border-gray-700 h-full flex flex-col shrink-0">
+  const sidebarPanel = (
+    <div className="w-64 border-r border-gray-200 dark:border-gray-700 h-full flex flex-col shrink-0 bg-white dark:bg-gray-900">
       <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex gap-2">
         <button
-          onClick={() => navigate('/chat')}
+          onClick={() => { navigate('/chat'); if (isMobile) setCollapsed(true); }}
           className="flex-1 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           + {t('chat.newChat')}
@@ -191,7 +195,7 @@ export function ConversationList({ activeId }: ConversationListProps) {
       </div>
       <div className="p-3 border-t border-gray-200 dark:border-gray-700">
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => { navigate('/settings'); if (isMobile) setCollapsed(true); }}
           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <span>⚙️</span>
@@ -200,4 +204,17 @@ export function ConversationList({ activeId }: ConversationListProps) {
       </div>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setCollapsed(true)} />
+        <div className="fixed inset-y-0 left-0 z-50">
+          {sidebarPanel}
+        </div>
+      </>
+    );
+  }
+
+  return sidebarPanel;
 }

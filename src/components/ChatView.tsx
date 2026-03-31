@@ -375,7 +375,7 @@ export function ChatView({ conversationId }: ChatViewProps) {
                   />
                 )}
                 {!isGenerating && !isSummarizing && editingMsgId !== msg.id && (
-                  <div className={`flex gap-1.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity ${msg.role === 'user' ? 'justify-end pr-11' : 'pl-11'}`}>
+                  <div className={`flex gap-1.5 mt-0.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity ${msg.role === 'user' ? 'justify-end pr-11' : 'pl-11'}`}>
                     <button
                       onClick={() => navigator.clipboard.writeText(msg.content)}
                       className="text-gray-400 hover:text-blue-500"
@@ -489,7 +489,7 @@ export function ChatView({ conversationId }: ChatViewProps) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex items-center gap-2 px-2 sm:px-4 pt-1">
+      <div className="flex items-center gap-2 px-2 sm:px-4 pt-1 overflow-x-auto [&>*]:shrink-0">
         {hasMessages && !isGenerating && !isSummarizing && (
           <>
             {isMulti && (

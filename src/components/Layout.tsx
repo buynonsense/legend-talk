@@ -90,12 +90,16 @@ export function Layout() {
         <div className="flex items-center gap-1">
           <LanguageToggle />
           <ThemeToggle />
-          <Dropdown label={lang === 'zh' ? '更多' : 'More'}>
-            <NavLinks links={PROJECT_LINKS} lang={lang} />
-          </Dropdown>
-          <Dropdown label={lang === 'zh' ? '支持' : 'Support'}>
-            <NavLinks links={SUPPORT_LINKS} lang={lang} />
-          </Dropdown>
+          <div className="hidden sm:block">
+            <Dropdown label={lang === 'zh' ? '更多' : 'More'}>
+              <NavLinks links={PROJECT_LINKS} lang={lang} />
+            </Dropdown>
+          </div>
+          <div className="hidden sm:block">
+            <Dropdown label={lang === 'zh' ? '支持' : 'Support'}>
+              <NavLinks links={SUPPORT_LINKS} lang={lang} />
+            </Dropdown>
+          </div>
           <a
             href="https://github.com/rockbenben/legend-talk"
             target="_blank"

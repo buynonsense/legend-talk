@@ -57,7 +57,7 @@ export function ChatPage() {
           <ChatView conversationId={validId} />
         ) : (
           <div className="h-full overflow-y-auto">
-            <div className="p-6 max-w-4xl mx-auto">
+            <div className="p-4 sm:p-6 max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-2">{t('home.title')}</h2>
               <div className="flex gap-2 mb-6">
                 <button
